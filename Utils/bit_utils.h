@@ -13,4 +13,8 @@ inline bool     test_bit(Bitboard b, Square s)    { return b & (1ULL << s); }
 
 inline int      popcount(Bitboard b)              { return __builtin_popcountll(b); }
 inline Square   lsb(Bitboard b)                   { return __builtin_ctzll(b); }
+
+// Checks the first bit it finds and turns it op, useful for small things and for cycles where you
+// want to pop items
 inline Square   pop_lsb(Bitboard& b)              { Square s = lsb(b); b &= b-1; return s; }
+
