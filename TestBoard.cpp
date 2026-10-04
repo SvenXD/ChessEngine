@@ -5,9 +5,37 @@
 #include "Utils/bit_utils.h"
 #include "Utils/types.h"
 
+#include "MakeMove/makemove.h"
 #include "Board/position.h"
+#include "MoveGen/movegen.h"
+#include "Attacks/precomputed.h"
+
 
 using namespace std;
+
+void test_make_unmake_roundtrip(Position pos) {
+    std::vector<Move> moves;
+    moves.reserve(256);
+    generate_moves(pos, moves);
+
+    Position original = pos;   // snapshot
+
+    for (Move m : moves) {
+        make_move(pos, m);
+        unmake_move(pos, m);
+
+        // Must be byte-identical to original
+        assert(pos.side_to_move    == original.side_to_move);
+        assert(pos.castling_rights == original.castling_rights);
+        assert(pos.ep_square       == original.ep_square);
+        assert(pos.halfmove        == original.halfmove);
+        assert(pos.fullmove        == original.fullmove);
+        assert(pos.occupied        == original.occupied);
+        for (int i = 0; i < 12; ++i) assert(pos.pieces[i] == original.pieces[i]);
+        for (int i = 0; i <  2; ++i) assert(pos.colors[i] == original.colors[i]);
+    }
+    std::cout << "round-trip OK for " << moves.size() << " moves\n";
+}
 
 Piece pieceGetter(char c) {
     switch (c) {
@@ -100,6 +128,8 @@ void parse_FEN(Position& pos, const string& fen){
 
 int main(){
 
+    init_attack_tables();
+
     //Files = columns -> a-h
     // Ranks = Rows -> 1-8
 
@@ -140,5 +170,9 @@ int main(){
 
     Square s = pop_lsb(b); assert(s == 5); assert(popcount(b) == 1);
 */
+
+cout  << ".--------------------------------------------------" << endl;
+
+test_make_unmake_roundtrip(test_pos);
     return 0;
 }

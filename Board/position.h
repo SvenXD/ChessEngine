@@ -1,7 +1,16 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include "../Utils/types.h"
+
+struct UndoInfo {
+    Piece  captured        = PIECE_NONE;   // PIECE_NONE if no capture
+    Square captured_sq     = -1;           // usually == to_sq; different for en passant
+    int    castling_rights = 0;
+    int    ep_square       = -1;
+    int    halfmove        = 0;
+};
 
 /**
  * @brief Template for the current state of a game.
@@ -18,9 +27,14 @@ struct Position {
     Square   ep_square = -1;        // -1 = none
     int      halfmove = 0;
     int      fullmove = 1;
+
+    std::vector<UndoInfo> undo_stack; 
 };
 
 Piece pieceGetter(char c);
 void put_piece(Position& pos, Piece piece, Square sq, Color color);
 void parse_fen(Position& pos, const std::string& fen);
 void print_board(const Position& pos);
+
+bool is_square_attacked(Square sq, Color attacker, const Position& pos);
+bool in_check(const Position& pos, Color c);
