@@ -1,24 +1,22 @@
 #include "makemove.h"
 #include "../Board/position.h"
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
-// Which piece (0..11) occupies this square? Returns PIECE_NONE if empty.
+
+/* tldr just checks all the pieces and the POS utils to see which one is there*/
 static Piece piece_on(const Position& pos, Square sq) {
     for (int p = 0; p < 12; ++p)
         if (test_bit(pos.pieces[p], sq)) return static_cast<Piece>(p);
     return PIECE_NONE;
 }
 
-// ---------------------------------------------------------------------------
-// make_move
-// ---------------------------------------------------------------------------
 void make_move(Position& pos, Move m) {
     Square   from = from_sq(m);
     Square   to   = to_sq(m);
     MoveFlag flag = flag_of(m);
+
+    // Remember since its 16 bits, Move already stores the final positions, the starter and what
+    // the move was about
 
     Color us   = pos.side_to_move;
     Color them = static_cast<Color>(1 - us);
@@ -101,14 +99,12 @@ void make_move(Position& pos, Move m) {
     //   - King moves: both of that side's rights are gone.
     //   - Rook moves from its home square: that side's corresponding right is gone.
     //   - A rook is captured on its home square: enemy's right is gone.
-    const int WK = 8, WQ = 4, BK = 2, BQ = 1;
-
-    if (moving == W_KING) pos.castling_rights &= ~(WK | WQ);
-    if (moving == B_KING) pos.castling_rights &= ~(BK | BQ);
-    if (from == 0  || to == 0 ) pos.castling_rights &= ~WQ;   // a1
-    if (from == 7  || to == 7 ) pos.castling_rights &= ~WK;   // h1
-    if (from == 56 || to == 56) pos.castling_rights &= ~BQ;   // a8
-    if (from == 63 || to == 63) pos.castling_rights &= ~BK;   // h8
+    if (moving == W_KING) pos.castling_rights &= ~(WK_CASTLE | WQ_CASTLE);
+    if (moving == B_KING) pos.castling_rights &= ~(BK_CASTLE | BQ_CASTLE);
+    if (from == 0  || to == 0 ) pos.castling_rights &= ~WQ_CASTLE; // a1
+    if (from == 7  || to == 7 ) pos.castling_rights &= ~WK_CASTLE; // h1
+    if (from == 56 || to == 56) pos.castling_rights &= ~BQ_CASTLE; // a8
+    if (from == 63 || to == 63) pos.castling_rights &= ~BK_CASTLE; // h8
 
     // 8. En passant square for next ply.
     if (flag == FLAG_DOUBLE) {
@@ -131,9 +127,7 @@ void make_move(Position& pos, Move m) {
     pos.undo_stack.push_back(u);
 }
 
-// ---------------------------------------------------------------------------
-// unmake_move
-// ---------------------------------------------------------------------------
+
 void unmake_move(Position& pos, Move m) {
     Square   from = from_sq(m);
     Square   to   = to_sq(m);

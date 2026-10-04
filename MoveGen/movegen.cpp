@@ -224,7 +224,7 @@ static void generate_castling_moves(const Position& pos, std::vector<Move>& out)
     // Pretty self explanatory, checks if they are busy and if any piece is attacking specific castling squares
     if (us == WHITE) {
         // White Kingside (e1 -> g1)
-        if (pos.castling_rights & 8) {
+        if (pos.castling_rights & WK_CASTLE) {
             if (!test_bit(pos.occupied, SQ_F1) && !test_bit(pos.occupied, SQ_G1)) {
                 if (!is_square_attacked(SQ_E1, them, pos) &&
                     !is_square_attacked(SQ_F1, them, pos) &&
@@ -235,7 +235,7 @@ static void generate_castling_moves(const Position& pos, std::vector<Move>& out)
             }
         }
         // White Queenside (e1 -> c1)
-        if (pos.castling_rights & 4) {
+        if (pos.castling_rights & WQ_CASTLE) {
             if (!test_bit(pos.occupied, SQ_B1) && !test_bit(pos.occupied, SQ_C1) && !test_bit(pos.occupied, SQ_D1)) {
                 if (!is_square_attacked(SQ_E1, them, pos) &&
                     !is_square_attacked(SQ_D1, them, pos) &&
@@ -247,7 +247,7 @@ static void generate_castling_moves(const Position& pos, std::vector<Move>& out)
         }
     } else {
         // Black Kingside (e8 -> g8)
-        if (pos.castling_rights & 2) {
+        if (pos.castling_rights & BK_CASTLE) {
             if (!test_bit(pos.occupied, SQ_F8) && !test_bit(pos.occupied, SQ_G8)) {
                 if (!is_square_attacked(SQ_E8, WHITE, pos) &&
                     !is_square_attacked(SQ_F8, WHITE, pos) &&
@@ -258,7 +258,7 @@ static void generate_castling_moves(const Position& pos, std::vector<Move>& out)
             }
         }
         // Black Queenside (e8 -> c8)
-        if (pos.castling_rights & 1) {
+        if (pos.castling_rights & BQ_CASTLE) {
             if (!test_bit(pos.occupied, SQ_B8) && !test_bit(pos.occupied, SQ_C8) && !test_bit(pos.occupied, SQ_D8)) {
                 if (!is_square_attacked(SQ_E8, WHITE, pos) &&
                     !is_square_attacked(SQ_D8, WHITE, pos) &&
