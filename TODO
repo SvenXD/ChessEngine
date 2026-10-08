@@ -1,3 +1,28 @@
 Comment POSition.cpp and h more precicely
 
+The whole evaluate folder more clear
+and also Search
+
 and enpasssant castling comments more clear
+
+Phase 1: Static Evaluation (Scoring the Board)
+This is the engine's intuition. It takes a raw Position and returns a single integer score representing who is winning (positive for White, negative for Black, or relative to the side-to-move).
+
+Material Weighting: A simple loop or counter tracking the raw value of the pieces on the board. Standard values: Pawn = 100, Knight = 300, Bishop = 300, Rook = 500, Queen = 900.
+
+Piece-Square Tables (PSTs): Precomputed 64-integer arrays that give positional bonuses or penalties. A Knight on d4 gets a +30 bonus, while a Knight on a1 gets a -20 penalty. The engine inherently learns basic positional chess without you writing complex "if-else" logic.
+
+Phase 2: Core Search (Foresight)
+This is where you weaponize the recursive tree structure you already built for Perft, turning it into a decision-making machine.
+
+Negamax Algorithm: A mathematical trick that simplifies standard Minimax. Because chess is a zero-sum game, you evaluate the board from the perspective of the current player, and simply negate the score of the opponent's turn: score = -search(-beta, -alpha, depth - 1).
+
+Alpha-Beta Pruning: The most critical optimization in chess programming. It passes an alpha (minimum guaranteed score) and beta (maximum possible score) down the tree. If the engine sees a move where the opponent wins a Queen, it immediately breaks the loop and stops searching that branch, saving millions of calculations.
+
+Phase 3: Tactical Polish & Speed (Optimization)
+A raw Negamax search is blind to sudden tactical swings. These two algorithms fix the engine's blind spots and drastically multiply its speed.
+
+Quiescence Search (Q-Search): This solves the "Horizon Effect." If your depth 5 search ends exactly when your Queen is captured, the engine thinks you blundered. Q-Search takes over at depth 0 and continues searching only capturing moves until the board is quiet (no pending captures), ensuring the engine sees the immediate recapture.
+
+Move Ordering (MVV-LVA): Alpha-Beta pruning only cuts off branches quickly if it evaluates the best moves first. Before searching a node, you will sort your generated moves by Most Valuable Victim / Least Valuable Attacker (e.g., checking Pawn takes Queen before checking a quiet King move).
+

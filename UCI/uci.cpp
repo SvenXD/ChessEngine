@@ -9,12 +9,34 @@
 #include <string>
 #include <vector>
 
-// Forward declaration of parse_FEN if it's not in position.h
-extern void parse_FEN(Position& pos, const std::string& fen);
-extern uint64_t perft_divide(Position& pos, int depth);
+// Forward declaration of parse_fen if it's not in position.h
+extern void parse_fen(Position& pos, const std::string& fen);
+//extern uint64_t perft_divide(Position& pos, int depth);
 
 // Helper: Converts a string like "e2e4" or "e7e8q" into your engine's Move object
-static Move parse_move(const std::string& move_str, const Position& pos) {
+Move parse_move(const std::string& move_str, const Position& pos) {
+    if (move_str.length() != 4 && move_str.length() != 5) {
+        return 0;
+    }
+
+    if (move_str[0] < 'a' || move_str[0] > 'h' ||
+        move_str[1] < '1' || move_str[1] > '8' ||
+        move_str[2] < 'a' || move_str[2] > 'h' ||
+        move_str[3] < '1' || move_str[3] > '8') {
+        return 0;
+    }
+
+    MoveFlag requested_promotion = FLAG_QUIET;
+    if (move_str.length() == 5) {
+        switch (move_str[4]) {
+            case 'q': requested_promotion = FLAG_PROMO_Q; break;
+            case 'r': requested_promotion = FLAG_PROMO_R; break;
+            case 'b': requested_promotion = FLAG_PROMO_B; break;
+            case 'n': requested_promotion = FLAG_PROMO_N; break;
+            default: return 0;
+        }
+    }
+
     std::vector<Move> moves;
     generate_moves(pos, moves);
 
@@ -27,25 +49,16 @@ static Move parse_move(const std::string& move_str, const Position& pos) {
     Square target_sq = static_cast<Square>(target_rank * 8 + target_file);
 
     for (const auto& move : moves) {
-        if (from_sq(move) == source_sq && to_sq(move) == target_sq) {
-            // Check for promotion character if present
-            if (move_str.length() == 5) {
-                int flag = move & 0xF000; // Assuming standard 16-bit move layout; adjust if needed
-                char promo = move_str[4];
-                if ((promo == 'q' && flag == FLAG_PROMO_Q) ||
-                    (promo == 'r' && flag == FLAG_PROMO_R) ||
-                    (promo == 'b' && flag == FLAG_PROMO_B) ||
-                    (promo == 'n' && flag == FLAG_PROMO_N)) {
-                    return move;
-                }
-                continue;
-            }
+        if (from_sq(move) == source_sq && to_sq(move) == target_sq &&
+            ((move_str.length() == 5 && flag_of(move) == requested_promotion) ||
+             (move_str.length() == 4 && !is_promotion(move)))) {
             return move;
         }
     }
     return 0; // Invalid or illegal move
 }
 
+// In UCI/uci.cpp
 void parse_position(const std::string& command, Position& pos) {
     std::istringstream ss(command);
     std::string token;
@@ -53,22 +66,24 @@ void parse_position(const std::string& command, Position& pos) {
 
     ss >> token;
     if (token == "startpos") {
-        parse_FEN(pos, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-        ss >> token; // Consume "moves" if it exists
+        parse_fen(pos, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        ss >> token; // Consume "moves" if present
     } else if (token == "fen") {
         std::string fen = "";
         while (ss >> token && token != "moves") {
             fen += token + " ";
         }
-        parse_FEN(pos, fen);
+        parse_fen(pos, fen);
     }
 
-    // Apply any moves provided after the position setup
+    // Apply moves provided after the position setup
     while (ss >> token) {
         Move m = parse_move(token, pos);
-        if (m != 0) {
-            make_move(pos, m);
+        if (m == 0) {
+            std::cerr << "[ERROR] Failed to parse move string: '" << token << "'\n";
+            break; // Stop parsing to prevent board state corruption
         }
+        make_move(pos, m);
     }
 }
 
@@ -89,7 +104,7 @@ void parse_go(const std::string& command, Position& pos) {
     }
 
     // For now, since search isn't built, route 'go' to perft so you can test it in GUIs
-    perft_divide(pos, depth);
+   // perft_divide(pos, depth);
     
     // When you build Search, replace perft_divide with:
     // Move best_move = search(pos, depth);
@@ -98,7 +113,7 @@ void parse_go(const std::string& command, Position& pos) {
 
 void uci_loop() {
     Position pos;
-    parse_FEN(pos, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    parse_fen(pos, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
     std::string line;
     std::cout << "id name MyChessEngine\n";
@@ -121,7 +136,7 @@ void uci_loop() {
             std::cout << "readyok\n";
         } 
         else if (command == "ucinewgame") {
-            parse_FEN(pos, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+            parse_fen(pos, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         } 
         else if (command == "position") {
             parse_position(line, pos);

@@ -1,6 +1,7 @@
 #include "position.h"
 #include "../Attacks/precomputed.h"
 #include "../Attacks/sliding.h"
+#include <sstream>
 
 bool is_square_attacked(Square sq, Color attacker, const Position& pos) {
     Color defender = static_cast<Color>(1 - attacker);
@@ -37,4 +38,77 @@ bool in_check(const Position& pos, Color c) {
     Piece king = (c == WHITE) ? W_KING : B_KING;
     Square ksq = lsb(pos.pieces[king]);
     return is_square_attacked( ksq, static_cast<Color>(1 - c), pos);
+}
+
+void parse_fen(Position& pos, const std::string& fen){
+
+    pos = Position();
+
+    std::stringstream ss(fen);   
+    std::string boardStr, sideStr, castlingStr, epStr;
+
+    ss >> boardStr >> sideStr >> castlingStr >> epStr;
+    int rank = 7, file = 0;
+
+    for(char c: boardStr){
+        if(c == '/'){
+            rank--;
+            file = 0;
+        }else if(isdigit(c)){
+            file += c-'0';
+        }else{
+            Piece piece = pieceGetter(c);
+            Color color = (piece >= W_PAWN && piece <= W_KING) ? WHITE : BLACK;
+            Square sq   = (rank * 8) + file;
+            put_piece(pos, piece, sq, color);
+            file++;
+        }
+    }
+
+    pos.side_to_move = (sideStr == "w") ? WHITE : BLACK;
+
+    if (castlingStr != "-") {
+        for (char c : castlingStr) {
+            switch (c) {
+                case 'K': pos.castling_rights |= WK_CASTLE; break;
+                case 'Q': pos.castling_rights |= WQ_CASTLE; break;
+                case 'k': pos.castling_rights |= BK_CASTLE; break;
+                case 'q': pos.castling_rights |= BQ_CASTLE; break;
+            }
+        }
+    }
+
+    if(epStr != "-"){
+        pos.ep_square = ((epStr[1] - '1') * 8) + (epStr[0] - 'a');
+    }else{
+        pos.ep_square = -1;
+    }
+}
+
+Piece pieceGetter(char c) {
+    switch (c) {
+        // Black Pieces
+        case 'p': return B_PAWN;
+        case 'n': return B_KNIGHT;
+        case 'b': return B_BISHOP;
+        case 'r': return B_ROOK;
+        case 'q': return B_QUEEN;
+        case 'k': return B_KING;
+
+        // White Pieces
+        case 'P': return W_PAWN;
+        case 'N': return W_KNIGHT;
+        case 'B': return W_BISHOP;
+        case 'R': return W_ROOK;
+        case 'Q': return W_QUEEN;
+        case 'K': return W_KING;
+
+        default:  return PIECE_NONE; // Sentinel value for invalid input or empty squares
+    }
+}
+
+void put_piece(Position& pos, Piece piece, Square sq, Color color) {
+    pos.pieces[piece] |= (1ULL << sq);
+    pos.colors[color] |= (1ULL << sq);
+    pos.occupied      |= (1ULL << sq);
 }

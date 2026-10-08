@@ -57,3 +57,5 @@ inline bool is_quiet(Move m) {
     MoveFlag f = flag_of(m);
     return f == FLAG_QUIET || f == FLAG_DOUBLE || f == FLAG_CASTLE;
 }
+
+std::string move_to_string(Move m); 
