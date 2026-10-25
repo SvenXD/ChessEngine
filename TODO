@@ -26,3 +26,6 @@ Quiescence Search (Q-Search): This solves the "Horizon Effect." If your depth 5 
 
 Move Ordering (MVV-LVA): Alpha-Beta pruning only cuts off branches quickly if it evaluates the best moves first. Before searching a node, you will sort your generated moves by Most Valuable Victim / Least Valuable Attacker (e.g., checking Pawn takes Queen before checking a quiet King move).
 
+
+
+Fix hardcoded paths

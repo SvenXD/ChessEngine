@@ -1,6 +1,6 @@
 #include "evaluate.h"
 #include "pst.h"
-#include <algorithm> // for std::min
+#include <algorithm>
 
 // Material values in centipawns
 constexpr int PAWN_VALUE   = 100;

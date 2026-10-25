@@ -18,8 +18,8 @@ void make_move(Position& pos, Move m) {
     // Remember since its 16 bits, Move already stores the final positions, the starter and what
     // the move was about
 
-    Color us   = pos.side_to_move;
-    Color them = static_cast<Color>(1 - us);
+    Side us   = pos.side_to_move;
+    Side them = static_cast<Side>(1 - us);
 
     // 1. Save undo information before mutating anything.
     UndoInfo u;
@@ -134,8 +134,8 @@ void unmake_move(Position& pos, Move m) {
     MoveFlag flag = flag_of(m);
 
     // Restore side to the mover before we do anything else.
-    Color them = pos.side_to_move;              // currently the opponent
-    Color us   = static_cast<Color>(1 - them);  // the side that just moved
+    Side them = pos.side_to_move;              // currently the opponent
+    Side us   = static_cast<Side>(1 - them);  // the side that just moved
     pos.side_to_move = us;
 
     if (us == BLACK) pos.fullmove -= 1;
@@ -197,7 +197,7 @@ void unmake_move(Position& pos, Move m) {
 
     // 3. Restore captured piece (normal capture, promotion-capture, or ep).
     if (u.captured != PIECE_NONE) {
-        Color cap_color = (u.captured >= W_PAWN && u.captured <= W_KING) ? WHITE : BLACK;
+        Side cap_color = (u.captured >= W_PAWN && u.captured <= W_KING) ? WHITE : BLACK;
         pos.pieces[u.captured] |= (1ULL << u.captured_sq);
         pos.colors[cap_color]  |= (1ULL << u.captured_sq);
         pos.occupied           |= (1ULL << u.captured_sq);

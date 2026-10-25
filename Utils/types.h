@@ -4,7 +4,7 @@
 using Bitboard = std::uint64_t;
 using Square   = int;
 
-enum Color{
+enum Side{
     WHITE, BLACK
 };
 

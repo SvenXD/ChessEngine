@@ -25,8 +25,8 @@ static void emit_moves(Square from, Bitboard attacks, Bitboard enemy,
 static void generate_knight_moves(const Position& pos, std::vector<Move>& out){
 
     /* Important to get the color or each and the type of piece*/
-    Color us    = pos.side_to_move;
-    Color them  = static_cast<Color>(1 - us);
+    Side us    = pos.side_to_move;
+    Side them  = static_cast<Side>(1 - us);
     Piece our_knight = (us == WHITE) ? W_KNIGHT : B_KNIGHT;
 
     Bitboard knights = pos.pieces[our_knight];
@@ -54,8 +54,8 @@ static void generate_knight_moves(const Position& pos, std::vector<Move>& out){
 }
 
 static void generate_bishop_moves(const Position& pos, std::vector<Move>& out){
-    Color us = pos.side_to_move;
-    Color them = static_cast<Color>(1-us);
+    Side us = pos.side_to_move;
+    Side them = static_cast<Side>(1-us);
 
     Piece bishop = (us == WHITE) ? W_BISHOP : B_BISHOP;
 
@@ -76,8 +76,8 @@ static void generate_bishop_moves(const Position& pos, std::vector<Move>& out){
 }
 
 static void generate_rook_moves(const Position& pos, std::vector<Move>& out){
-    Color us = pos.side_to_move;
-    Color them = static_cast<Color>(1-us);
+    Side us = pos.side_to_move;
+    Side them = static_cast<Side>(1-us);
 
     Piece rook = (us == WHITE)? W_ROOK : B_ROOK;
 
@@ -94,8 +94,8 @@ static void generate_rook_moves(const Position& pos, std::vector<Move>& out){
 }
 
 static void generate_king_moves(const Position& pos, std::vector<Move>& out){
-    Color us   = pos.side_to_move;
-    Color them = static_cast<Color>(1 - us);
+    Side us   = pos.side_to_move;
+    Side them = static_cast<Side>(1 - us);
 
     Piece king = (us == WHITE) ? W_KING : B_KING;
 
@@ -111,8 +111,8 @@ static void generate_king_moves(const Position& pos, std::vector<Move>& out){
 }
 
 static void generate_queen_moves(const Position& pos, std::vector<Move>& out){
-    Color us   = pos.side_to_move;
-    Color them = static_cast<Color>(1 - us);
+    Side us   = pos.side_to_move;
+    Side them = static_cast<Side>(1 - us);
 
     Piece queen = (us == WHITE) ? W_QUEEN : B_QUEEN;
 
@@ -132,8 +132,8 @@ static void generate_queen_moves(const Position& pos, std::vector<Move>& out){
 */
 
 static void generate_pawn_moves(const Position& pos, std::vector<Move>& out){
-    Color us   = pos.side_to_move;
-    Color them = static_cast<Color>(1 - us);
+    Side us   = pos.side_to_move;
+    Side them = static_cast<Side>(1 - us);
 
     Piece pawn = (us == WHITE) ? W_PAWN : B_PAWN;
 
@@ -219,8 +219,8 @@ static void generate_pawn_moves(const Position& pos, std::vector<Move>& out){
 
 static void generate_castling_moves(const Position& pos, std::vector<Move>& out)
 {
-    Color us   = pos.side_to_move;
-    Color them = static_cast<Color>(1 - us);
+    Side us   = pos.side_to_move;
+    Side them = static_cast<Side>(1 - us);
     // Pretty self explanatory, checks if they are busy and if any piece is attacking specific castling squares
     if (us == WHITE) {
         // White Kingside (e1 -> g1)

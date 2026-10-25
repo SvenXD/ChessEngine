@@ -13,7 +13,7 @@
 #include "Attacks/precomputed.h"
 #include "UCI/uci.h"
 
-inline void put_piece(Position& pos, Piece piece, Square sq, Color color) {
+inline void put_piece(Position& pos, Piece piece, Square sq, Side color) {
     pos.pieces[piece] |= (1ULL << sq);
     pos.colors[color] |= (1ULL << sq);
     pos.occupied      |= (1ULL << sq);
@@ -59,7 +59,7 @@ void parse_FEN(Position& pos, const std::string& fen){
             file += c-'0';
         }else{
             Piece piece = pieceGetter(c);
-            Color color = (piece >= W_PAWN && piece <= W_KING) ? WHITE : BLACK;
+            Side color = (piece >= W_PAWN && piece <= W_KING) ? WHITE : BLACK;
             Square sq   = (rank * 8) + file;
             put_piece(pos, piece, sq, color);
             file++;
@@ -101,7 +101,7 @@ uint64_t perft(Position& pos, int depth) {
     for (const auto& move : move_list) {
         make_move(pos, move);
 
-        Color side_that_moved = static_cast<Color>(1 - pos.side_to_move);
+        Side side_that_moved = static_cast<Side>(1 - pos.side_to_move);
         
         // Only count the nodes if the move was strictly legal
         if (!in_check(pos, side_that_moved)) {
@@ -131,7 +131,7 @@ uint64_t perft_divide(Position& pos, int depth) {
     for (const auto& move : move_list) {
         make_move(pos, move);
 
-        Color side_that_moved = static_cast<Color>(1 - pos.side_to_move);
+        Side side_that_moved = static_cast<Side>(1 - pos.side_to_move);
         if (!in_check(pos, side_that_moved)) {
             uint64_t nodes = perft(pos, depth - 1);
             total_nodes += nodes;

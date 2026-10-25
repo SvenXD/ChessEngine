@@ -60,21 +60,21 @@ Piece pieceGetter(char c) {
 }
 
 // Add a piece to a square
-inline void put_piece(Position& pos, Piece piece, Square sq, Color color) {
+inline void put_piece(Position& pos, Piece piece, Square sq, Side color) {
     pos.pieces[piece] |= (1ULL << sq);
     pos.colors[color] |= (1ULL << sq);
     pos.occupied      |= (1ULL << sq);
 }
 
 // Remove a piece from a square
-inline void remove_piece(Position& pos, Piece piece, Square sq, Color color) {
+inline void remove_piece(Position& pos, Piece piece, Square sq, Side color) {
     pos.pieces[piece] &= ~(1ULL << sq);
     pos.colors[color] &= ~(1ULL << sq);
     pos.occupied      &= ~(1ULL << sq);
 }
 
 // Move a piece using XOR bitwise trick
-inline void move_piece(Position& pos, Piece piece, Square from, Square to, Color color) {
+inline void move_piece(Position& pos, Piece piece, Square from, Square to, Side color) {
     uint64_t move_mask = (1ULL << from) | (1ULL << to);
     pos.pieces[piece] ^= move_mask;
     pos.colors[color] ^= move_mask;
@@ -99,7 +99,7 @@ void parse_FEN(Position& pos, const string& fen){
             file += c-'0';
         }else{
             Piece piece = pieceGetter(c);
-            Color color = (piece >= W_PAWN && piece <= W_KING) ? WHITE : BLACK;
+            Side color = (piece >= W_PAWN && piece <= W_KING) ? WHITE : BLACK;
             Square sq   = (rank * 8) + file;
             put_piece(pos, piece, sq, color);
             file++;

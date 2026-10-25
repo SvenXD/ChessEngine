@@ -31,7 +31,7 @@ void play_move(const std::string& game_id, const std::string& move) {
 }
 
 // Añade el parámetro del color con el que juega tu bot (WHITE o BLACK)
-void auto_play_game(const std::string& game_id, Color my_color) {
+void auto_play_game(const std::string& game_id, Side my_color) {
     std::string command = "curl -sN https://lichess.org/api/bot/game/stream/" + game_id + " "
                           "-H \"Authorization: Bearer " + API_TOKEN + "\"";
 

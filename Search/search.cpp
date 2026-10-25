@@ -43,7 +43,7 @@ bool negamax(Position& pos, int depth, int alpha, int beta,
     for (const auto& move : moves) {
         make_move(pos, move);
 
-        Color side_that_moved = static_cast<Color>(1 - pos.side_to_move);
+        Side side_that_moved = static_cast<Side>(1 - pos.side_to_move);
         if (in_check(pos, side_that_moved)) {
             unmake_move(pos, move);
             continue;
@@ -86,7 +86,7 @@ Move search_best_move_impl(Position& pos, int max_depth,
     Move best_move = 0;
     for (const auto& move : moves) {
         make_move(pos, move);
-        Color side_that_moved = static_cast<Color>(1 - pos.side_to_move);
+        Side side_that_moved = static_cast<Side>(1 - pos.side_to_move);
         bool legal = !in_check(pos, side_that_moved);
         unmake_move(pos, move);
         if (legal) {
@@ -110,7 +110,7 @@ Move search_best_move_impl(Position& pos, int max_depth,
 
         for (const auto& move : moves) {
             make_move(pos, move);
-            Color side_that_moved = static_cast<Color>(1 - pos.side_to_move);
+            Side side_that_moved = static_cast<Side>(1 - pos.side_to_move);
             if (in_check(pos, side_that_moved)) {
                 unmake_move(pos, move);
                 continue;

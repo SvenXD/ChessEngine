@@ -23,7 +23,7 @@ struct Position {
     Bitboard pieces[12] = {};   // one per Piece enum
     Bitboard colors[2]  = {};   // OR of all white / all black
     Bitboard occupied   = 0;    // OR of everything
-    Color    side_to_move = WHITE;
+    Side     side_to_move = WHITE;
     uint8_t  castling_rights = 0;   // 4 bits: WK, WQ, BK, BQ
     Square   ep_square = -1;        // -1 = none
     int      halfmove = 0;
@@ -33,11 +33,11 @@ struct Position {
 };
 
 Piece pieceGetter(char c);
-void put_piece(Position& pos, Piece piece, Square sq, Color color);
+void put_piece(Position& pos, Piece piece, Square sq, Side color);
 
 
 void parse_fen(Position& pos, const std::string& fen);
 void print_board(const Position& pos);
 
-bool is_square_attacked(Square sq, Color attacker, const Position& pos);
-bool in_check(const Position& pos, Color c);
+bool is_square_attacked(Square sq, Side attacker, const Position& pos);
+bool in_check(const Position& pos, Side c);
