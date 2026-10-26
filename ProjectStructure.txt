@@ -1,0 +1,142 @@
+CHESS ENGINE PROJECT STRUCTURE
+==============================
+
+What this project is
+--------------------
+This is a C++ chess engine built around 64-bit bitboards. The engine code handles
+board state, attacks, move generation, make/unmake, evaluation, and search.
+Separate root-level programs provide a Raylib board display, a Lichess bot
+bridge, and development/test entry points.
+
+ENGINE FLOW
+-----------
+Position/FEN -> MoveGen + Attacks -> MakeMove -> Search -> Eval
+                      |                 |
+                      +---- Board ------+
+
+MoveGen generates candidate moves. Search and the perft tests make each
+candidate, reject moves that leave the moving side's king in check, then undo
+the move. Search evaluates positions with Eval and returns a move. UCI and the
+Lichess bridge are intended interfaces to the engine, but the current UCI "go"
+handler is not yet connected to Search.
+
+FOLDERS
+-------
+
+Attacks/
+  Provides square-attack lookup data and attack calculations.
+  - precomputed.h/.cpp: Shared lookup tables for pawn, knight, and king attacks;
+    init_attack_tables() fills them during program startup.
+  - sliding.h/.cpp: Rook and bishop ray attacks stop at the first occupied
+    square (including that square); queen attacks combine both.
+
+Board/
+  The engine's chess state and move representation.
+  - position.h/.cpp: Position stores one bitboard per piece, per-side and total
+    occupancy, side to move, castling rights, en-passant target, move clocks,
+    and the make/unmake undo stack. Also maps FEN piece characters, builds a
+    position from FEN, and checks attacks/check.
+  - move.h/.cpp: Packs source square, destination square, and move type into a
+    16-bit Move; provides flag checks and converts moves to UCI coordinate
+    notation such as e2e4 or e7e8q.
+
+MakeMove/
+  Applies and reverses a move while maintaining all board bitboards and state.
+  Handles captures, en passant, promotions, castling rook movement, castling
+  rights, en-passant targets, clocks, side-to-move, and the undo stack.
+
+MoveGen/
+  Generates candidate moves for the current side: pawn pushes/captures,
+  promotions, en passant, knight, bishop, rook, queen, king, and castling.
+  The result is generally pseudo-legal: callers must filter moves that leave
+  their own king in check. Castling generation itself also checks empty path
+  squares and whether the king's start/transit/destination squares are attacked.
+
+Eval/
+  Scores a Position from the perspective of the side to move.
+  - evaluate.h/.cpp: Adds material values and piece-square bonuses/penalties,
+    then blends midgame and endgame scores according to remaining non-pawn
+    material (game phase).
+  - pst.h: The midgame and endgame 64-square bonus tables for each piece.
+
+Search/
+  Chooses a move by exploring the game tree.
+  - search.h/.cpp: Negamax with alpha-beta pruning, iterative deepening, and a
+    deadline-based timed search. It checks legal moves and returns the best
+    move from the last completed depth. It currently has no quiescence search,
+    move ordering, or transposition table.
+
+UCI/
+  Reads and responds to the Universal Chess Interface command stream.
+  - uci.h/.cpp: Handles the main loop, position setup (start position or FEN
+    followed by moves), and parses UCI coordinate moves. The "go" handler
+    currently parses a requested depth but does not call Search or emit a
+    bestmove response, so a GUI cannot yet use it to get engine moves.
+
+Utils/
+  Shared low-level types and bitboard helpers.
+  - types.h: Defines squares, colors, piece/type enums, castling-right flags,
+    and file/rank/square conversion helpers.
+  - bit_utils.h: Set, clear, test, count, and pop bits in 64-bit bitboards.
+
+test/
+  Standalone validation programs (each has its own main and should be built/run
+  separately).
+  - Test.cpp: Checks move encoding/decoding, move-flag predicates, square
+    helpers, and bit operations.
+  - Perft.cpp: Recursively counts legal move-tree nodes and compares several
+    FEN positions against known perft totals; prints a root-move divide and
+    timing data.
+  - fakemain.cpp: Contains another perft/perft-divide implementation and a
+    UCI-loop main; it is an experimental/duplicate test harness, not the
+    normal engine entry point.
+
+assets/cburnett/
+  PNG artwork used by the Raylib GUI: board background and the twelve colored
+  piece sprites.
+
+.vscode/
+  Local VS Code C++ IntelliSense and build-task configuration. The task uses
+  MSYS2 g++ and Raylib paths configured for this Windows machine.
+
+ROOT-LEVEL SOURCE FILES
+-----------------------
+
+guiMain.cpp
+  Raylib graphical board program. Initializes the starting position, loads
+  board/piece images, and draws the static board and a side panel. It currently
+  does not implement mouse input, move interaction, or call Search. Asset
+  filenames are currently loaded through absolute paths tied to one machine.
+
+LichessBot.cpp
+  Separate console program for a basic Lichess bot bridge. It can accept a
+  challenge and stream a game, rebuilds the board from the move history, asks
+  Search for a timed move, and posts it using curl. It uses an API credential
+  in source code and shell commands; treat that credential as sensitive and
+  do not publish it. The bot currently selects White when starting a stream.
+
+TestBoard.cpp
+  Development harness that initializes attacks, parses a sample FEN, prints
+  the board as piece indexes, and checks make/unmake round trips for generated
+  moves. It is a separate test executable, not the production GUI.
+
+TODO
+  Local project notes / planned work. This file is excluded from Git by the
+  current .gitignore, so it may not be present in a fresh checkout.
+
+ProjectStructure.txt
+  This guide to the purpose of project folders and files.
+
+BUILD / REPOSITORY NOTES
+-----------------------
+- There is no top-level build-system file visible in the project; the VS Code
+  task in .vscode/tasks.json builds the active file together with selected
+  engine sources and Raylib. It is configured for local Windows dependencies.
+- The root-level programs and test programs have multiple main() functions;
+  compile only the chosen entry point with its required source files.
+- .gitignore excludes .vscode/, build/, bin/, executables, object files, TODO,
+  and lichessBridgeTest.cpp. The .exe files currently in the working folder
+  are built artifacts, not source modules. lichessBridgeTest.cpp is an ignored
+  local file and is not part of the tracked source tree.
+- Position declares print_board(), but there is no implementation in the
+  current tracked sources.

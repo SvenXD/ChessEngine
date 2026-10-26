@@ -38,8 +38,6 @@ enum Squares : int {
     SQ_NONE = 64
 };
 
-/* Research registrees and inline theory as to why use it TODO:*/
-//  TODO: Do it
 
 //Files = columns -> a-h
 // Ranks = Rows -> 1-8

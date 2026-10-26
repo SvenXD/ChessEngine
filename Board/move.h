@@ -20,8 +20,8 @@ using Move = uint16_t;
 enum MoveFlag : uint16_t {
     FLAG_QUIET      = 0,
     FLAG_CAPTURE    = 1,
-    FLAG_DOUBLE     = 2,   // pawn double push (for ep square tracking)
-    FLAG_EP         = 3,   // en passant capture
+    FLAG_DOUBLE     = 2,
+    FLAG_EP         = 3,
     FLAG_CASTLE     = 4,
     FLAG_PROMO_N    = 5,
     FLAG_PROMO_B    = 6,

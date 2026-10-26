@@ -4,6 +4,7 @@
 #include "../Board/move.h"
 #include "../MoveGen/movegen.h"
 #include "../MakeMove/makemove.h"
+#include "../Search/search.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -103,12 +104,15 @@ void parse_go(const std::string& command, Position& pos) {
         depth = 5; // Default depth if none provided
     }
 
-    // For now, since search isn't built, route 'go' to perft so you can test it in GUIs
-   // perft_divide(pos, depth);
-    
-    // When you build Search, replace perft_divide with:
-    // Move best_move = search(pos, depth);
-    // std::cout << "bestmove " << move_to_string(best_move) << std::endl;
+    Move best = search_best_move_timed(pos, std::chrono::milliseconds(1000));
+    // or: Move best = search(pos, depth);
+
+    if (best == 0) {
+        // No legal move (checkmate / stalemate) — some GUIs expect a null reply.
+        std::cout << "bestmove 0000" << std::endl;
+    } else {
+        std::cout << "bestmove " << move_to_string(best) << std::endl;
+    }
 }
 
 void uci_loop() {
